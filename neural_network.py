@@ -20,7 +20,7 @@ class NeuralNetwork:
             self.layers[i] = self.layers[i].activation_function(np.dot(self.layers[i-1], self.layers[i].weight_vector))
     
 
-    def append_layer(self,new_layer):
+    def append_layer(self, new_layer):
         self.layers.append(new_layer)
 
 
@@ -31,7 +31,7 @@ class Layer:
         self.number_of_activation_function = number_of_function
     
 
-    def activation_function(self, number_of_function):
+    def activation_function(self):
         """
         Funkcje aktywcji do wyboru:
             1.Funkcja liniowa
