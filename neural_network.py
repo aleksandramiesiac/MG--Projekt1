@@ -1,13 +1,29 @@
+"""
+
+Plik zawierajacy klase reprezentujaca siec neuronowa
+oraz klasę reprezentujaca warstwe sieci
+
+"""
+
 import numpy as np
+import activation_functions as af
 
 
 class NeuralNetwork:
+    def __init__(self, x, y, config):
+        self.input_vector = x       # warstwa wejsciowa
+        self.output_vector = y      # oczekiwana odpowiedz dla danej probki
+        # self.output = np.zeros(self.output_vector.shape)     # warstwa wyjściowa
+        self.number_of_layers = int(config["number_of_layers"])     # liczba warstw
+        self.layers = [None] * self.number_of_layers          # warstwy
+        self.layer_size = int(config["layer_size"])           # liczba neuronow w warstwie
+        self.activation_function = getattr(af, config["activation_function"])  # funkcja aktywacji; domyslnie - sigmoidalna funkcja unipolarna 
+        self.learning_rate = int(config["learning_rate"])     # wspolczynnik nauki
+        self.problem = config["problem"]                      # problem: klasyfikacja lub regresja
+        self.output = Layer(self.layer_size, 1)     # TO DO: w przypadku regresji 1, w przypadku klasyfikacji n (gdzie n - liczba klas ?)
 
-    def __init__(self, x, y, learning_rate):
-        self.input_vector = x       # ilosc cech probki
-        self.output_vector = y      # odpowiedz dla danej probki
-        self.lr = learning_rate
-        self.layers = []
+        for i in range(self.number_of_layers):
+            self.layers[i] = Layer(self.input_vector.shape[1], self.layer_size)
 
 
     def backpropagation(self):
@@ -15,71 +31,22 @@ class NeuralNetwork:
 
 
     def feedforward(self):
-        self.layers[0] = self.layers[0](np.dot(self.input_vector, self.layers[0].weight_vector))
-        for i in range(1, len(self.layers)):
-            self.layers[i] = self.layers[i].activation_function(np.dot(self.layers[i-1], self.layers[i].weight_vector))
-    
+        self.layers[0].neurons = self.activation_function(np.dot(self.input_vector, self.layers[0].weight_vector))
+        for i in range(1, self.number_of_layers):
+            self.layers[i].neurons = self.activation_function(np.dot(self.layers[i-1].neurons, self.layers[i].weight_vector))
+        if self.problem == "regression":
+            self.output.neurons = af.linear_function(np.dot(self.layers[self.number_of_layers - 1].neurons, self.output.weight_vector))
+        else:
+            self.output.neurons = self.activation_function(np.dot(self.layers[self.number_of_layers - 1].neurons, self.output.weight_vector))
 
-    def append_layer(self, new_layer):
-        self.layers.append(new_layer)
+
+    # def append_layer(self, new_layer):
+    #     self.layers.append(new_layer)
 
 
 
 class Layer:
-    def __init__(self, input_size, layer_size, number_of_function):
+    def __init__(self, input_size, layer_size):
+        self.size = layer_size
+        self.neurons = None
         self.weight_vector = np.random.randn(input_size, layer_size)
-        self.number_of_activation_function = number_of_function
-    
-
-    def activation_function(self):
-        """
-        Funkcje aktywcji do wyboru:
-            1.Funkcja liniowa
-            2.Obcięta funkcja liniowa 
-            3.Funkcja progowa unipolarna 
-            4.Funkcja progowa bipolarna 
-            5.Sigmoidalna funkcja unipolarna 
-            6.Sigmoidalna funkcja bipolarna (tangens hiperboliczny) 
-            7.Funkcja Gaussa 
-        """
-        if self.number_of_activation_function == 1:
-            return (1/2)*self.weight_vector
-
-        elif self.number_of_activation_function == 2:
-            wektor=[]
-            for x in self.weight_vector:
-                if x < -1 :
-                    wektor.append(-1)
-                elif x > 1:
-                    wektor.append(1)
-                else:
-                    wektor.append(x)
-
-        elif self.number_of_activation_function == 3:
-            wektor=[]
-            for x in self.weight_vector:
-                if x < 0 :
-                    wektor.append(0)
-                else:
-                    wektor.append(1)
-        
-        elif self.number_of_activation_function == 4:
-            wektor=[]
-            for x in self.weight_vector:
-                if x < 0 :
-                    wektor.append(-1)
-                else:
-                    wektor.append(1)
-
-        elif self.number_of_activation_function == 5:      
-            return 1/(1+np.exp(-self.weight_vector))
-
-        elif self.number_of_activation_function == 6:
-            return (1-np.exp(-self.weight_vector))/(1+np.exp(-self.weight_vector))
-
-        elif self.number_of_activation_function == 7:
-            return np.exp((-(self.weight_vector)**2)/2)
-        
-        else:
-            raise Exception("Błędny numer funkcji aktywacji! Wybierz od 1-7")
-
