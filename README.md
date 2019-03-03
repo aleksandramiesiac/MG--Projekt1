@@ -18,3 +18,11 @@
 * Wizualizacja zbioru uczącego i efektów klasyfikacji oraz regresji
 * Raport opisujący powstały program, przeprowadzone eksperymenty i wnioski
 
+## TO DO:
+- uzupełnić plik activation_functions.py
+- napisać funkcję backpropagation w klasie NeuralNetwork
+- dostosować output do problemu klasyfikacji (ma być wiele wyjść?)
+- dodać do pliku konfiguracyjnego (liczbę neuronów w każdej warstwie i) współczynnik bezwładności
+- dostosować NeuralNetwork do powyższego
+- w pliku main.py: wczytywanie zbiorów treningowych, trenowanie sieci (liczba iteracji ze słownika config), wczytywanie zbiorów testowych, rysowanie wykresów 
+- raport
