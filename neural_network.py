@@ -27,7 +27,14 @@ class NeuralNetwork:
 
 
     def backpropagation(self):
-        pass
+        # rekurencyjne obliczanie wg 'wzoru lancuchowego' (tak jak w test_NN)
+        d_weights = []
+        for i in range(self.number_of_layers):
+            d_weights[i] = self.recursive_loss(self,i)
+
+        # zaktualizowanie wag w kazdej warstwie
+        for i in range(self.number_of_layers):
+            self.layers[i].weight_vector += d_weights[i]
 
 
     def feedforward(self):
@@ -43,6 +50,12 @@ class NeuralNetwork:
     # def append_layer(self, new_layer):
     #     self.layers.append(new_layer)
 
+
+    def recursive_loss(self,n):
+        if n==1:
+            np.dot(2 * (self.y - self.output_vector) * self.activation_function(self.output_vector,True))
+        else:
+            return np.dot(self.layers(n), self.recursive_loss(n-1))
 
 
 class Layer:
