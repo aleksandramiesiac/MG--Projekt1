@@ -32,52 +32,30 @@ def sigmoid_function(x):
     """ Sigmoidalna funkcja unipolarna """
     return 1.0 / (1.0 + np.exp(-x))
 
+def unipolar_threshold_function(x):
+    """Funkcja progowa unipolarna """
+    wektor = []
+    for elem in x:
+        if elem < 0 :
+            wektor.append(0)
+        else:
+            wektor.append(1)
+    return wektor
 
-# def activation_function(self):
-#     """
-#     Funkcje aktywcji do wyboru:
-#         1.Funkcja liniowa
-#         2.Obcięta funkcja liniowa 
-#         3.Funkcja progowa unipolarna 
-#         4.Funkcja progowa bipolarna 
-#         5.Sigmoidalna funkcja unipolarna 
-#         6.Sigmoidalna funkcja bipolarna (tangens hiperboliczny) 
-#         7.Funkcja Gaussa 
-#     """
-#     if self.number_of_activation_function == 1:
-#         return (1/2)*self.weight_vector
+def bipolar_threshold_function(x):
+    """Funkcja progowa bipolarna """
+    wektor = []
+    for elem in x:
+        if elem < 0 :
+            wektor.append(-1)
+        else:
+            wektor.append(1)
+    return wektor
 
-#     elif self.number_of_activation_function == 2:
-#         wektor=[]
-#         for x in self.weight_vector:
-#             if x < -1 :
-#                 wektor.append(-1)
-#             elif x > 1:
-#                 wektor.append(1)
-#             else:
-#                 wektor.append(x)
+def sigmoid_function_bi(x):
+    """Sigmoidalna funkcja bipolarna (tangens hiperboliczny) """
+    return (1-np.exp(-x))/(1+np.exp(-x))
 
-#     elif self.number_of_activation_function == 3:
-#         wektor=[]
-#         for x in self.weight_vector:
-#             if x < 0 :
-#                 wektor.append(0)
-#             else:
-#                 wektor.append(1)
-    
-#     elif self.number_of_activation_function == 4:
-#         wektor=[]
-#         for x in self.weight_vector:
-#             if x < 0 :
-#                 wektor.append(-1)
-#             else:
-#                 wektor.append(1)
-
-#     elif self.number_of_activation_function == 5:      
-#         return 1/(1+np.exp(-self.weight_vector))
-
-#     elif self.number_of_activation_function == 6:
-#         return (1-np.exp(-self.weight_vector))/(1+np.exp(-self.weight_vector))
-
-#     elif self.number_of_activation_function == 7:
-#         return np.exp((-(self.weight_vector)**2)/2)
+def gaussian_function(x):
+    """Funkcja Gaussa"""
+    return np.exp((-x**2)/2) 
