@@ -22,6 +22,7 @@ class NeuralNetwork:
         self.problem = config["problem"]                      # problem: klasyfikacja lub regresja
         self.output = Layer(self.layer_size, 1)     # TO DO: w przypadku regresji 1, w przypadku klasyfikacji n (gdzie n - liczba klas ?)
 
+
         for i in range(self.number_of_layers):
             self.layers[i] = Layer(self.input_vector.shape[1], self.layer_size)
 
@@ -53,6 +54,15 @@ class NeuralNetwork:
             self.output.neurons = af.linear_function(np.dot(self.layers[self.number_of_layers - 1].neurons, self.output.weight_vector))
         else:
             self.output.neurons = self.activation_function(np.dot(self.layers[self.number_of_layers - 1].neurons, self.output.weight_vector))
+
+    def train(self,number_of_iterations):
+        for i in range(number_of_iterations):
+            self.feedforward()
+            self.backpropagation()
+
+    def predict(self):
+        pass
+
 
 
     # def append_layer(self, new_layer):

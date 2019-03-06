@@ -30,7 +30,7 @@ NN = nn.NeuralNetwork(train_set_X, train_set_y, config)
 
 # proces uczenia sieci
 
-NN.train()
+NN.train(int(config["number_of_iterations"]))
 
 NN.predict()
 
