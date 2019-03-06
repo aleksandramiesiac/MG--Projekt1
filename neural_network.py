@@ -14,7 +14,7 @@ class NeuralNetwork:
         self.input_vector = x       # warstwa wejsciowa
         self.output_vector = y      # oczekiwana odpowiedz dla danej probki
         # self.output = np.zeros(self.output_vector.shape)     # warstwa wyjściowa
-        self.number_of_layers = int(config["number_of_layers"])     # liczba warstw
+        self.number_of_layers = int(config["number_of_layers"])     # liczba warstw ukrytych( bez input i output)
         self.layers = [None] * self.number_of_layers          # warstwy
         self.layer_size = int(config["layer_size"])           # liczba neuronow w warstwie
         self.activation_function = getattr(af, config["activation_function"])  # funkcja aktywacji; domyslnie - sigmoidalna funkcja unipolarna 
@@ -29,13 +29,21 @@ class NeuralNetwork:
     def backpropagation(self):
         # rekurencyjne obliczanie wg 'wzoru lancuchowego' (tak jak w test_NN)
         d_weights = []
-        for i in range(self.number_of_layers):
-            d_weights[i] = self.recursive_loss(self,i)
+        d_weights[0]= np.dot(self.input_vector.T ,self.recursive_loss(self.number_of_layers+1))
+        for i in range(1,self.number_of_layers+1):
+            d_weights[i] = np.dot(self.layers[i-1].neurons.T ,self.recursive_loss(self.number_of_layers+1-i))
 
         # zaktualizowanie wag w kazdej warstwie
         for i in range(self.number_of_layers):
-            self.layers[i].weight_vector += d_weights[i]
+            self.layers[i].weight_vector += d_weights[i]*self.learning_rate
+        self.output.weight_vector += d_weights[-1]*self.learning_rate
 
+    def recursive_loss(self,n, ktory = -1):
+        if n==1:
+            return 2 * (self.output.neurons - self.output_vector) * self.activation_function(self.output.neurons,True)
+        else:
+            ktory+=1
+            return np.dot(self.recursive_loss(n-1,ktory),self.layers[ktory].weight_vector.T)*self.activation_function(self.layers[ktory].neurons,True)
 
     def feedforward(self):
         self.layers[0].neurons = self.activation_function(np.dot(self.input_vector, self.layers[0].weight_vector))
@@ -49,14 +57,6 @@ class NeuralNetwork:
 
     # def append_layer(self, new_layer):
     #     self.layers.append(new_layer)
-
-
-    def recursive_loss(self,n):
-        if n==1:
-            np.dot(2 * (self.y - self.output_vector) * self.activation_function(self.output_vector,True))
-        else:
-            return np.dot(self.layers(n), self.recursive_loss(n-1))
-
 
 class Layer:
     def __init__(self, input_size, layer_size):

@@ -7,77 +7,70 @@ Plik z funkcjami aktywacji
 import numpy as np
 
 
-def linear_function(x):
+def linear_function(x, derivative = False):
     """ Funkcja liniowa """
-    return (1/2) * x
+    return 1/2 if derivative else (1/2) * x
 
 
-def cut_linear_function(x):
+def cut_linear_function(x, derivative = False):
     """ Obcięta funkcja liniowa  """
     wektor = []
+    d = []
     for elem in x:
         if elem < -1 :
             wektor.append(-1)
+            d.append(0)
         elif elem > 1:
             wektor.append(1)
+            d.append(0)
         else:
             wektor.append(elem)
-    return wektor
+            d.append(1)
+    return d if derivative else wektor
 
 
-# TO DO: przepisac w ten sam sposob pozostale funkcje (3, 4, 6, 7)
+def unipolar_threshold_function(x, derivative = False):
+    """Funkcja progowa unipolarna """
+    wektor = []
+    d = [0] * len(x)
+    for elem in x:
+        if elem < 0 :
+            wektor.append(0)
+        else:
+            wektor.append(1)
+    return d if derivative else wektor
 
 
-def sigmoid_function(x):
+def bipolar_threshold_function(x, derivative = False):
+    """Funkcja progowa bipolarna """
+    wektor = []
+    d = [0] * len(x)
+    for elem in x:
+        if elem < 0 :
+            wektor.append(-1)
+        else:
+            wektor.append(1)
+    return d if derivative else wektor
+
+
+def sigmoid_function(x, derivative = False):
     """ Sigmoidalna funkcja unipolarna """
-    return 1.0 / (1.0 + np.exp(-x))
+    return x * (1.0 - x) if derivative else 1.0 / (1.0 + np.exp(-x))
 
 
-# def activation_function(self):
-#     """
-#     Funkcje aktywcji do wyboru:
-#         1.Funkcja liniowa
-#         2.Obcięta funkcja liniowa 
-#         3.Funkcja progowa unipolarna 
-#         4.Funkcja progowa bipolarna 
-#         5.Sigmoidalna funkcja unipolarna 
-#         6.Sigmoidalna funkcja bipolarna (tangens hiperboliczny) 
-#         7.Funkcja Gaussa 
-#     """
-#     if self.number_of_activation_function == 1:
-#         return (1/2)*self.weight_vector
+def sigmoid_function_bi(x, derivative = False):
+    """Sigmoidalna funkcja bipolarna (tangens hiperboliczny) """
+    return sigmoid_function_bi_d(x) if derivative else sigmoid_function_bi_f(x)
 
-#     elif self.number_of_activation_function == 2:
-#         wektor=[]
-#         for x in self.weight_vector:
-#             if x < -1 :
-#                 wektor.append(-1)
-#             elif x > 1:
-#                 wektor.append(1)
-#             else:
-#                 wektor.append(x)
 
-#     elif self.number_of_activation_function == 3:
-#         wektor=[]
-#         for x in self.weight_vector:
-#             if x < 0 :
-#                 wektor.append(0)
-#             else:
-#                 wektor.append(1)
-    
-#     elif self.number_of_activation_function == 4:
-#         wektor=[]
-#         for x in self.weight_vector:
-#             if x < 0 :
-#                 wektor.append(-1)
-#             else:
-#                 wektor.append(1)
+def sigmoid_function_bi_f(x):
+    return (1 - np.exp(-x)) / (1 + np.exp(-x))
 
-#     elif self.number_of_activation_function == 5:      
-#         return 1/(1+np.exp(-self.weight_vector))
 
-#     elif self.number_of_activation_function == 6:
-#         return (1-np.exp(-self.weight_vector))/(1+np.exp(-self.weight_vector))
+def sigmoid_function_bi_d(x):
+    return 1 - sigmoid_function_bi_f(x) ** 2
 
-#     elif self.number_of_activation_function == 7:
-#         return np.exp((-(self.weight_vector)**2)/2)
+
+def gaussian_function(x, derivative = False):
+    """Funkcja Gaussa"""
+    return -2 * x * np.exp(-x ** 2) if derivative else np.exp((-x**2)/2) 
