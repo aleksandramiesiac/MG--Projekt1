@@ -10,9 +10,9 @@ import activation_functions as af
 
 
 class NeuralNetwork:
-    def __init__(self, x, y, config):
-        self.input_vector = x       # warstwa wejsciowa
-        self.output_vector = y      # oczekiwana odpowiedz dla danej probki
+    def __init__(self, config):
+        self.input_vector = None      # warstwa wejsciowa
+        self.output_vector = None     # oczekiwana odpowiedz dla danej probki
         # self.output = np.zeros(self.output_vector.shape)     # warstwa wyjściowa
         self.number_of_layers = int(config["number_of_layers"])     # liczba warstw ukrytych( bez input i output)
         self.layers = [None] * self.number_of_layers          # warstwy
@@ -23,6 +23,7 @@ class NeuralNetwork:
         self.output = Layer(self.layer_size, 1)     # TO DO: w przypadku regresji 1, w przypadku klasyfikacji n (gdzie n - liczba klas ?)
 
 
+    def add_layers(self):
         for i in range(self.number_of_layers):
             self.layers[i] = Layer(self.input_vector.shape[1], self.layer_size)
 
@@ -39,12 +40,14 @@ class NeuralNetwork:
             self.layers[i].weight_vector += d_weights[i]*self.learning_rate
         self.output.weight_vector += d_weights[-1]*self.learning_rate
 
+
     def recursive_loss(self,n, ktory = -1):
         if n==1:
             return 2 * (self.output.neurons - self.output_vector) * self.activation_function(self.output.neurons,True)
         else:
             ktory+=1
             return np.dot(self.recursive_loss(n-1,ktory),self.layers[ktory].weight_vector.T)*self.activation_function(self.layers[ktory].neurons,True)
+
 
     def feedforward(self):
         self.layers[0].neurons = self.activation_function(np.dot(self.input_vector, self.layers[0].weight_vector))
@@ -55,18 +58,28 @@ class NeuralNetwork:
         else:
             self.output.neurons = self.activation_function(np.dot(self.layers[self.number_of_layers - 1].neurons, self.output.weight_vector))
 
-    def train(self,number_of_iterations):
+
+    def train(self,train_set_X, train_set_y, number_of_iterations):
+
+        self.input_vector = train_set_X
+        self.output_vector = train_set_y
+
+        self.add_layers()
+
         for i in range(number_of_iterations):
             self.feedforward()
             self.backpropagation()
 
-    def predict(self):
-        pass
+
+    def predict(self, test_set_x):
+        self.input_vector = test_set_x
+        self.feedforward()
+        return self.output
 
 
+    #def evaluate(self):
 
-    # def append_layer(self, new_layer):
-    #     self.layers.append(new_layer)
+
 
 class Layer:
     def __init__(self, input_size, layer_size):
