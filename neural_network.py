@@ -30,27 +30,31 @@ class NeuralNetwork:
 
     def backpropagation(self):
 
-        pass
+        d_weights = []
 
-        # rekurencyjne obliczanie wg 'wzoru lancuchowego' (tak jak w test_NN)
-        #d_weights = []
+        # zmiana wag w ostatniej warstwie:
+        d1 = self.loss_function(True)
+        d2 = d1 * self.output.neurons * (1 - self.output.neurons)
+        print(d1)
+        print(d2)
+        print(d2 * self.layers[self.number_of_layers-1].neurons.T)
+        d_weights.append(d1 * d2 * self.layers[self.number_of_layers-1].neurons.T)
 
-        # ostatnia warstwa:
-        #d1 = self.loss_function(True)
-        #d2 = d1 * self.output * (1 - self.output)
+        # zmiany wag w warstwach ukrytych:
+        for i in range(1,self.number_of_layers+1,-1):
 
+            d_weights[i-1] = 8
 
-        #for i in range(1,self.number_of_layers+1,-1):
-            #d_weights[i] = np.dot(self.layers[i-1].neurons.T ,self.recursive_loss(self.number_of_layers+1-i))
+        print(d_weights)
 
         # zaktualizowanie wag w kazdej warstwie
-        #for i in range(self.number_of_layers):
-        #    self.layers[i].weight_vector += d_weights[i]*self.learning_rate
-        #self.output.weight_vector += d_weights[-1]*self.learning_rate
+        for i in range(self.number_of_layers):
+            self.layers[i].weight_vector += d_weights[i]*self.learning_rate
+        self.output.weight_vector += d_weights[-1]*self.learning_rate
 
 
     def loss_function(self, derivative = False):
-        return 2*(self.output - self.output_vector) if derivative else np.pow(self.output - self.output_vector)
+        return 2*(self.output.neurons - self.output_vector) if derivative else np.pow(self.output - self.output_vector)
 
 #    def recursive_loss(self,n, ktory = -1):
 #        if n==1:
