@@ -20,7 +20,7 @@ class NeuralNetwork:
         self.activation_function = getattr(af, config["activation_function"])  # funkcja aktywacji; domyslnie - sigmoidalna funkcja unipolarna 
         self.learning_rate = int(config["learning_rate"])     # wspolczynnik nauki
         self.problem = config["problem"]                      # problem: klasyfikacja lub regresja
-        self.output = Layer(self.layer_size, 1)     # TO DO: w przypadku regresji 1, w przypadku klasyfikacji n (gdzie n - liczba klas)
+        self.output = None     # TO DO: w przypadku regresji 1, w przypadku klasyfikacji n (gdzie n - liczba klas)
 
 
     def add_layers(self,shape):
@@ -34,23 +34,31 @@ class NeuralNetwork:
 
         # zmiana wag w ostatniej warstwie:
         d1 = self.loss_function(True)
-        d2 = d1 * self.output.neurons * (1 - self.output.neurons)
-        print(d1)
-        print(d2)
-        print(d2 * self.layers[self.number_of_layers-1].neurons.T)
-        d_weights.append(d1 * d2 * self.layers[self.number_of_layers-1].neurons.T)
+        d2 = d1 * self.activation_function(self.output.neurons,True)
+        print(d1.shape)
+        print(self.output.neurons.shape)
+        print(d2.shape)
+
+        d_weights.append(np.dot(self.output.neurons.T, d2))
+        print(d_weights[0].shape)
 
         # zmiany wag w warstwach ukrytych:
-        for i in range(1,self.number_of_layers+1,-1):
+        for i in range(self.number_of_layers-1,-1,-1):
+            print("tu jestem")
+            print(d_weights[0].shape)
+            print(d_weights[self.number_of_layers-1-i].shape)
+            print(self.layers[i].weight_vector.T.shape)
+            #temp = np.dot(d_weights[self.number_of_layers-1-i],self.layers[i].weight_vector.T) * self.activation_function(self.layers[i].neurons,True)
+            temp = np.dot(d2,self.layers[i].weight_vector.T) * self.activation_function(self.layers[i].neurons,True)
+            d_weights.append(np.dot(self.layers[i].neurons.T,temp))
 
-            d_weights[i-1] = 8
-
-        print(d_weights)
+        print("-----------------")
+        #print(d_weights)
 
         # zaktualizowanie wag w kazdej warstwie
         for i in range(self.number_of_layers):
-            self.layers[i].weight_vector += d_weights[i]*self.learning_rate
-        self.output.weight_vector += d_weights[-1]*self.learning_rate
+            self.layers[i].weight_vector += d_weights[self.number_of_layers - i]*self.learning_rate
+        self.output.weight_vector += d_weights[0]*self.learning_rate
 
 
     def loss_function(self, derivative = False):
@@ -84,23 +92,25 @@ class NeuralNetwork:
 
         self.add_layers(train_set_X.shape[1])
 
-        for i in range(train_set_X.shape[1]):
-            print("shape:")
-            print(train_set_X.shape[1])
-            print("pojedyncza probka?")
-            print(train_set_X[i,:])
-            print("odpowiedz pojedynczej probki:")
-            print(train_set_y[i])
+        n = train_set_y.shape[1]
 
-            # najlepiej podawać losowe kawałki zbioru danych, zamiast wszystkiego naraz albo pojedynczych próbek,
-            # ale powinno zadziałać i tak i tak
+        if self.problem == "regression":
+            self.output = Layer(self.layer_size, 1)
+        else:
+            self.output = Layer(self.layer_size, n)
 
-            self.input_vector = train_set_X[i,:]
-            self.output_vector = train_set_y[i]
-            for j in range(number_of_iterations):
-                self.feedforward()
-                print("przeszło feedforward")
-                self.backpropagation()
+
+        # najlepiej podawać losowe kawałki zbioru danych, zamiast wszystkiego naraz albo pojedynczych próbek,
+        # ale powinno zadziałać i tak i tak
+
+
+        self.input_vector = train_set_X
+        self.output_vector = train_set_y
+
+        for j in range(number_of_iterations):
+            self.feedforward()
+            print("przeszło feedforward")
+            self.backpropagation()
 
 
     def predict(self, test_set_x):
