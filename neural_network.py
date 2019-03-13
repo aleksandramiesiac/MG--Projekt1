@@ -7,6 +7,7 @@ oraz klasę reprezentujaca warstwe sieci
 
 import numpy as np
 import activation_functions as af
+from numpy import linalg as LA
 
 
 class NeuralNetwork:
@@ -18,7 +19,7 @@ class NeuralNetwork:
         self.layers = [None] * self.number_of_layers          # warstwy
         self.layer_size = int(config["layer_size"])           # liczba neuronow w warstwie
         self.activation_function = getattr(af, config["activation_function"])  # funkcja aktywacji; domyslnie - sigmoidalna funkcja unipolarna 
-        self.learning_rate = int(config["learning_rate"])     # wspolczynnik nauki
+        self.learning_rate = float(config["learning_rate"])     # wspolczynnik nauki
         self.problem = config["problem"]                      # problem: klasyfikacja lub regresja
         self.output = None     # TO DO: w przypadku regresji 1, w przypadku klasyfikacji n (gdzie n - liczba klas)
 
@@ -70,8 +71,8 @@ class NeuralNetwork:
         d_weights = [0] * (self.number_of_layers + 1)
 
         d1 = self.loss_function(True)
-        print("d1")
-        print(d1)
+        #print("d1")
+        #print(d1)
         d2 = d1 * self.activation_function(self.output.neurons, True)
 
         idx = self.number_of_layers
@@ -84,7 +85,7 @@ class NeuralNetwork:
             idx -= 1
 
             for i in range(idx, 0, -1):
-                print("jestem tu")
+                #print("jestem tu")
                 temp = np.dot(d2, self.layers[i+1].weight_vector.T) * self.activation_function(self.layers[i].neurons, True)
                 d_weights[i] = np.dot(self.layers[i-1].neurons.T, temp)
         
@@ -98,17 +99,17 @@ class NeuralNetwork:
 
         # zaktualizowanie wag w kazdej warstwie
         for i in range(self.number_of_layers):
-            self.layers[i].weight_vector += d_weights[i] * self.learning_rate
-        self.output.weight_vector += d_weights[self.number_of_layers] * self.learning_rate
+            self.layers[i].weight_vector -= d_weights[i] * self.learning_rate
+        self.output.weight_vector -= d_weights[self.number_of_layers] * self.learning_rate
 
 
     def loss_function(self, derivative = False):
-        print("self.output.neurons")
-        print(self.output.neurons)
-        print("self.output_vector")
-        print(self.output_vector)
-        return 2 * (self.output.neurons - self.output_vector) if derivative else np.power((self.output - self.output_vector), 2)
-    
+        #print("self.output.neurons")
+        #print(self.output.neurons)
+        #print("self.output_vector")
+        #print(self.output_vector)
+        return 2 * (self.output.neurons - self.output_vector) if derivative else np.power(LA.norm(self.output.neurons - self.output_vector), 2)
+
 
 #    def recursive_loss(self,n, ktory = -1):
 #        if n==1:
@@ -128,7 +129,7 @@ class NeuralNetwork:
         self.layers[0].neurons = self.activation_function(np.dot(self.input_vector, self.layers[0].weight_vector))
         for i in range(1, self.number_of_layers):
             self.layers[i].neurons = self.activation_function(np.dot(self.layers[i-1].neurons, self.layers[i].weight_vector))
-        
+
         if self.problem == "regression":
             self.output.neurons = af.linear_function(np.dot(self.layers[self.number_of_layers - 1].neurons, self.output.weight_vector))
         else:
@@ -145,13 +146,19 @@ class NeuralNetwork:
         # najlepiej podawać losowe kawałki zbioru danych, zamiast wszystkiego naraz albo pojedynczych próbek,
         # ale powinno zadziałać i tak i tak
 
-        self.input_vector = train_set_X
-        self.output_vector = train_set_y
+        self.input_vector = train_set_X[1:5,:]
+        self.output_vector = train_set_y[1:5,:]
+
+        print(self.input_vector)
+        print(self.output_vector)
 
         for i in range(number_of_iterations):
             self.feedforward()
-            print("przeszło feedforward")
             self.backpropagation()
+            print(self.loss_function())
+
+        print(self.output.neurons)
+        print(self.output_vector)
 
 
     def predict(self, test_set_x):

@@ -65,7 +65,7 @@ NN = nn.NeuralNetwork(config)
 NN.train(train_set_X, train_set_y_ohe, int(config["number_of_iterations"]))
 
 ### Wynik sieci dla zbioru testowego
-NN_output = NN.predict(test_set_X)
+#NN_output = NN.predict(test_set_X)
 
 ### Sprawdzenie wynikow (porownanie z oczekiwanymi)
-print(NN_output)
+#print(NN_output)
