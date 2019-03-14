@@ -71,12 +71,11 @@ class NeuralNetwork:
         d_weights = [0] * (self.number_of_layers + 1)
 
         d1 = self.loss_function(True)
-        #print("d1")
-        #print(d1)
         d2 = d1 * self.activation_function(self.output.neurons, True)
 
         idx = self.number_of_layers
         d_weights[idx] = np.dot(self.layers[idx - 1].neurons.T, d2)
+        # print(d_weights[idx].shape)
         idx -= 1
         
         if idx > 0:
@@ -86,15 +85,22 @@ class NeuralNetwork:
 
             for i in range(idx, 0, -1):
                 #print("jestem tu")
-                temp = np.dot(d2, self.layers[i+1].weight_vector.T) * self.activation_function(self.layers[i].neurons, True)
+                temp = np.dot(temp, self.layers[i+1].weight_vector.T) * self.activation_function(self.layers[i].neurons, True)
                 d_weights[i] = np.dot(self.layers[i-1].neurons.T, temp)
         
         if self.number_of_layers == 1:
             x = self.output
         else:
             x = self.layers[1]
+        
+        # print("d2")
+        # print(d2.shape)
+        # print("x.weight_vector")
+        # print(x.weight_vector.shape)
+        # print("output")
+        # print(self.output.weight_vector.shape)
 
-        temp = np.dot(d2, x.weight_vector.T) * self.activation_function(self.layers[0].neurons, True)
+        temp = np.dot(temp, x.weight_vector.T) * self.activation_function(self.layers[0].neurons, True)
         d_weights[0] = np.dot(self.input_vector.T, temp)
 
         # zaktualizowanie wag w kazdej warstwie
@@ -108,7 +114,8 @@ class NeuralNetwork:
         #print(self.output.neurons)
         #print("self.output_vector")
         #print(self.output_vector)
-        return 2 * (self.output.neurons - self.output_vector) if derivative else np.power(LA.norm(self.output.neurons - self.output_vector), 2)
+        x = self.output.neurons - self.output_vector
+        return 2 * x if derivative else np.power(LA.norm(x), 2)
 
 
 #    def recursive_loss(self,n, ktory = -1):
@@ -146,8 +153,8 @@ class NeuralNetwork:
         # najlepiej podawać losowe kawałki zbioru danych, zamiast wszystkiego naraz albo pojedynczych próbek,
         # ale powinno zadziałać i tak i tak
 
-        self.input_vector = train_set_X[1:5,:]
-        self.output_vector = train_set_y[1:5,:]
+        self.input_vector = train_set_X[1:50,:]
+        self.output_vector = train_set_y[1:50,:]
 
         print(self.input_vector)
         print(self.output_vector)
