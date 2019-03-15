@@ -59,10 +59,11 @@ with open("configuration_file.txt", "r") as conf_file:
 NN = nn.NeuralNetwork(config)
 
 ### Proces uczenia sieci
-NN.train(train_set_X, train_set_y_ohe, int(config["number_of_iterations"]))
+NN.train(train_set_X, train_set_y_ohe, int(config["batch_size"]), int(config["number_of_iterations"]))
 
 ### Wynik sieci dla zbioru testowego
 NN_output = NN.predict(test_set_X)
 
 ### Sprawdzenie wynikow (porownanie z oczekiwanymi)
 print(NN_output)
+print(test_set_y)

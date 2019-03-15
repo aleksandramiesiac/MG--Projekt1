@@ -22,6 +22,7 @@ class NeuralNetwork:
         self.learning_rate = float(config["learning_rate"])     # wspolczynnik nauki
         self.problem = config["problem"]                      # problem: klasyfikacja lub regresja
         self.output = None     # TO DO: w przypadku regresji 1, w przypadku klasyfikacji n (gdzie n - liczba klas)
+        self.loss_values = []       # zmienna przygotowana do zapisywania zmieniających się wartości funkcji loss
 
 
     def add_layers(self, shape):
@@ -33,40 +34,6 @@ class NeuralNetwork:
             # self.layers[i] = Layer(shape, self.layer_size)
 
 
-    # def backpropagation(self):
-    #     d_weights = []
-
-    #     # zmiana wag w ostatniej warstwie:
-    #     d1 = self.loss_function(True)
-    #     d2 = d1 * self.activation_function(self.output.neurons, True)
-    #     # print(d1.shape)
-    #     # print(self.output.neurons.shape)
-    #     # print(d2.shape)
-
-    #     # d_weights.append(np.dot(self.output.neurons.T, d2))
-    #     d_weights.append(np.dot(self.layers[], d2))
-    #     # print(d_weights[0].shape)
-
-    #     # zmiany wag w warstwach ukrytych:
-    #     for i in range(self.number_of_layers-1, -1, -1):
-    #         print("tu jestem")
-    #         print(d_weights[0].shape)
-    #         print(d_weights[self.number_of_layers-1-i].shape)
-    #         print(self.layers[i].weight_vector.T.shape)
-    #         #temp = np.dot(d_weights[self.number_of_layers-1-i],self.layers[i].weight_vector.T) * self.activation_function(self.layers[i].neurons,True)
-    #         temp = np.dot(d2,self.layers[i].weight_vector.T) * self.activation_function(self.layers[i].neurons, True)
-    #         d_weights.append(np.dot(self.layers[i].neurons.T, temp))
-
-    #     print("-----------------")
-    #     #print(d_weights)
-
-    #     # zaktualizowanie wag w kazdej warstwie
-    #     for i in range(self.number_of_layers):
-    #         self.layers[i].weight_vector += d_weights[self.number_of_layers - i] * self.learning_rate
-    #     self.output.weight_vector += d_weights[0] * self.learning_rate
-
-
-    # backpropagation jeszcze raz
     def backpropagation(self):
         d_weights = [0] * (self.number_of_layers + 1)
 
@@ -92,13 +59,6 @@ class NeuralNetwork:
             x = self.output
         else:
             x = self.layers[1]
-        
-        # print("d2")
-        # print(d2.shape)
-        # print("x.weight_vector")
-        # print(x.weight_vector.shape)
-        # print("output")
-        # print(self.output.weight_vector.shape)
 
         temp = np.dot(temp, x.weight_vector.T) * self.activation_function(self.layers[0].neurons, True)
         d_weights[0] = np.dot(self.input_vector.T, temp)
@@ -110,26 +70,8 @@ class NeuralNetwork:
 
 
     def loss_function(self, derivative = False):
-        #print("self.output.neurons")
-        #print(self.output.neurons)
-        #print("self.output_vector")
-        #print(self.output_vector)
         x = self.output.neurons - self.output_vector
         return 2 * x if derivative else np.power(LA.norm(x), 2)
-
-
-#    def recursive_loss(self,n, ktory = -1):
-#        if n==1:
-#           print("n: " + str(n))
-#            return 2 * (self.output.neurons - self.output_vector) * self.activation_function(self.output.neurons,True)
-#        else:
-#            print("n: " + str(n))
-#            print(self.layers[ktory].weight_vector.T.shape)
-#            print("wynik funkcji recursive loss: ")
-#            print(self.recursive_loss(n - 1, ktory))
-#            print(np.dot(self.recursive_loss(n-1,ktory),self.layers[ktory].weight_vector.T))
-#            ktory+=1
-#            return np.dot(self.recursive_loss(n-1,ktory),self.layers[ktory].weight_vector.T)*self.activation_function(self.layers[ktory].neurons,True)
 
 
     def feedforward(self):
@@ -143,7 +85,18 @@ class NeuralNetwork:
             self.output.neurons = self.activation_function(np.dot(self.layers[self.number_of_layers - 1].neurons, self.output.weight_vector))
 
 
-    def train(self, train_set_X, train_set_y, number_of_iterations):
+    def argmax_output(self, matrix):
+
+        new_output = []
+
+        for element in matrix:
+            new_output.append(element.argmax(axis=0)+1)
+
+        return new_output
+
+
+
+    def train(self, train_set_X, train_set_y, batch_size, number_of_iterations):
         self.add_layers(train_set_X.shape[1])
 
         n = 1 if self.problem == "regression" else train_set_y.shape[1]
@@ -152,26 +105,32 @@ class NeuralNetwork:
 
         # najlepiej podawać losowe kawałki zbioru danych, zamiast wszystkiego naraz albo pojedynczych próbek,
         # ale powinno zadziałać i tak i tak
-
-        self.input_vector = train_set_X[1:50,:]
-        self.output_vector = train_set_y[1:50,:]
-
-        print(self.input_vector)
-        print(self.output_vector)
+        # podział pełnego zbioru treningowego na kawałki:
 
         for i in range(number_of_iterations):
-            self.feedforward()
-            self.backpropagation()
-            print(self.loss_function())
+            for j in range(1,int(train_set_X.shape[0]/batch_size)):
+                self.input_vector = train_set_X[j* batch_size - batch_size :j * batch_size, :]
+                self.output_vector = train_set_y[j* batch_size - batch_size:j * batch_size, :]
+                #print(j* batch_size - batch_size)
+                #print(j * batch_size)
 
-        print(self.output.neurons)
-        print(self.output_vector)
+                self.feedforward()
+                self.backpropagation()
+                self.loss_values.append(self.loss_function())
+            #print("----------------")
+
+        print(self.argmax_output(self.output.neurons))
+
+        #print(self.output.neurons)
+        print(self.argmax_output(self.output_vector))
+
+
 
 
     def predict(self, test_set_x):
         self.input_vector = test_set_x
         self.feedforward()
-        return self.output.neurons
+        return self.argmax_output(self.output.neurons)
 
 
     #def evaluate(self):
