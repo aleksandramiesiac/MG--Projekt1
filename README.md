@@ -18,8 +18,6 @@
 * Raport opisujący powstały program, przeprowadzone eksperymenty i wnioski
 
 ## TO DO:
-- argmax w przypadku klasyfikacji
-- dodać do pliku konfiguracyjnego nazwę plików treningowego/testowego i dostosować main do tego (Agata)
 - rysowanie wykresów
 - raport (jupyter?)
 - na koniec: czyszczenie kodu xd (usuwanie zbędnych komentarzy itp.)
