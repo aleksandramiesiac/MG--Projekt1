@@ -116,7 +116,7 @@ class NeuralNetwork:
 
                 self.feedforward()
                 self.backpropagation()
-                self.loss_values.append(self.loss_function())
+            self.loss_values.append(self.loss_function())
             #print("----------------")
 
         print(self.argmax_output(self.output.neurons))

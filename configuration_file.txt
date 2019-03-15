@@ -1,7 +1,7 @@
 number_of_layers=5
 layer_size=10
 activation_function=sigmoid_function
-number_of_iterations=500
-learning_rate=0.3
-batch_size = 25
+number_of_iterations=700
+learning_rate=0.1
+batch_size = 50
 problem=classification

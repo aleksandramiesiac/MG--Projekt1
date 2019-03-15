@@ -7,7 +7,7 @@ Plik generujacy siec neuronowa
 import neural_network as nn
 import pandas as pd
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 ### Wczytywanie danych treningowych i testowych
 
@@ -67,3 +67,10 @@ NN_output = NN.predict(test_set_X)
 ### Sprawdzenie wynikow (porownanie z oczekiwanymi)
 print(NN_output)
 print(test_set_y)
+
+# @ TODO : funkcja która będzie porównywać wyjscie sieci ze zbiorem testowym i liczyc procent poprawnych dopasowan
+
+# Wykres loss:
+plt.plot(NN.loss_values)
+plt.ylabel('loss')
+plt.show()
