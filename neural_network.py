@@ -119,10 +119,10 @@ class NeuralNetwork:
             self.loss_values.append(self.loss_function())
             #print("----------------")
 
-        print(self.argmax_output(self.output.neurons))
+        #print(self.argmax_output(self.output.neurons))
 
         #print(self.output.neurons)
-        print(self.argmax_output(self.output_vector))
+        #print(self.argmax_output(self.output_vector))
 
 
 
@@ -133,7 +133,8 @@ class NeuralNetwork:
         return self.argmax_output(self.output.neurons)
 
 
-    #def evaluate(self):
+    def evaluate(self,a,b):
+        return np.sum(a == b)/len(a)
 
 
 

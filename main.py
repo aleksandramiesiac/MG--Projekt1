@@ -64,11 +64,15 @@ NN.train(train_set_X, train_set_y_ohe, int(config["batch_size"]), int(config["nu
 ### Wynik sieci dla zbioru testowego
 NN_output = NN.predict(test_set_X)
 
-### Sprawdzenie wynikow (porownanie z oczekiwanymi)
-print(NN_output)
-print(test_set_y)
+print("\nPorownanie wyniku sieci z oczekiwaniami (fragment zbioru danych):")
+print(NN_output[1:50])
+print(list(test_set_y.T[0][1:50]))
 
-# @ TODO : funkcja która będzie porównywać wyjscie sieci ze zbiorem testowym i liczyc procent poprawnych dopasowan
+print("\nKońcowa wartość błędu sieci: " + str(NN.loss_values[-1]))
+
+### Sprawdzenie wynikow (porownanie z oczekiwanymi)
+score = NN.evaluate(NN_output,test_set_y.T[0])
+print("\nAccuracy: " + str(score))
 
 # Wykres loss:
 plt.plot(NN.loss_values)
