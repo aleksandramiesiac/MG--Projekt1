@@ -21,6 +21,7 @@
 - rysowanie wykresów
 - raport (jupyter?)
 - na koniec: czyszczenie kodu xd (usuwanie zbędnych komentarzy itp.)
+- skończyć iterację wcześniej jeżeli funkcja straty przestała maleć (lub maleje za wolno)
 
 opcjonalnie:
 - dodać do pliku konfiguracyjnego (liczbę neuronów w każdej warstwie i) współczynnik bezwładności
