@@ -61,8 +61,13 @@ if config["problem"] == "classification":
     test_set_y_ohe = b
 
 else:
-    pass
+    ## Dane treningowe
+    train_set_X = train_set["x"].values.reshape(len(train_set["x"].values),1)
+    train_set_y = train_set["y"].values.reshape(len(train_set["y"].values),1)
 
+    ## Dane testowe
+    test_set_X = test_set["x"].values.reshape(len(test_set["x"].values),1)
+    test_set_y = test_set["y"].values.reshape(len(test_set["y"].values),1)
 
 
 ### Tworzenie sieci neuronowej
@@ -72,22 +77,34 @@ NN = nn.NeuralNetwork(config)
 if config["problem"] == "classification":
     NN.train(train_set_X, train_set_y_ohe, int(config["batch_size"]), int(config["number_of_iterations"]))
 else:
-    pass
+    NN.train(train_set_X, train_set_y, int(config["batch_size"]), int(config["number_of_iterations"]))
 
 ### Wynik sieci dla zbioru testowego
-NN_output = NN.predict(test_set_X)
+if config["problem"] == "classification":
+    NN_output = NN.predict(test_set_X)
+else:
+    
+    NN_output = NN.predict(test_set_X)
 
 print("\nPorownanie wyniku sieci z oczekiwaniami (fragment zbioru danych):")
-print(NN_output[1:50])
-print(list(test_set_y.T[0][1:50]))
+print(NN_output[1:50].T)
+print(test_set_y[1:50].T)
 
 print("\nKońcowa wartość błędu sieci: " + str(NN.loss_values[-1]))
 
 ### Sprawdzenie wynikow (porownanie z oczekiwanymi)
-score = NN.evaluate(NN_output,test_set_y.T[0])
+score = NN.evaluate(NN_output,test_set_y.T)
 print("\nAccuracy: " + str(score))
 
 # Wykres loss:
 plt.plot(NN.loss_values)
 plt.ylabel('loss')
+plt.show()
+
+plt.plot(NN_output.T[0],test_set_X)
+plt.ylabel('testowe')
+
+plt.plot(test_set_y,test_set_X)
+plt.ylabel('takie powinno byc')
+
 plt.show()

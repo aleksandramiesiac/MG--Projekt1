@@ -32,32 +32,66 @@ class NeuralNetwork:
             self.layers[i] = Layer(self.layer_size, self.layer_size)
 
 
+
     def backpropagation(self):
         d_weights = [0] * (self.number_of_layers + 1)
 
         d1 = self.loss_function(True)
-        d2 = d1 * self.activation_function(self.output.neurons, True)
 
         idx = self.number_of_layers
+        # if self.problem=="regression":
+        #     print("D1: \n", d1.shape, "\n act_fun(output neurons, pochodna): \n", self.activation_function(self.output.neurons, True).shape)
+        #     d2 = d1.T * self.activation_function(self.output.neurons, True)
+        #     d_weights[idx] = np.dot(self.layers[idx - 1].neurons.T, d2.T)
+        #     d2=d2.T
+        # else:
+        if self.problem == "regression":
+            function = af.linear_function
+            #self.output.neurons = af.linear_function(np.dot(self.layers[self.number_of_layers - 1].neurons, self.output.weight_vector))
+        else:
+
+            function = self.activation_function
+
+        d2 = d1 * function(self.output.neurons, True)
+        #print("d2",d2)
         d_weights[idx] = np.dot(self.layers[idx - 1].neurons.T, d2)
+
+        
+        #d_weights[idx] = np.dot(self.layers[idx - 1].neurons.T, d2)
         idx -= 1
         
         if idx > 0:
+            
+            # if self.problem=="regression":
+            #     temp = np.dot(d2, self.output.weight_vector.T).T * self.activation_function(self.layers[idx].neurons, True)
+            #     d_weights[idx] = np.dot(self.layers[idx-1].neurons.T, temp.T)
+
+            # else:
+            #print("self.layers[idx].neurons:",self.layers[idx].neurons)
             temp = np.dot(d2, self.output.weight_vector.T) * self.activation_function(self.layers[idx].neurons, True)
             d_weights[idx] = np.dot(self.layers[idx-1].neurons.T, temp)
             idx -= 1
 
             for i in range(idx, 0, -1):
+                # if self.problem=="regression":
+                #     temp = np.dot(temp.T, self.layers[i+1].weight_vector.T).T * self.activation_function(self.layers[i].neurons, True)
+                #     d_weights[i] = np.dot(self.layers[i-1].neurons.T, temp.T)
+                # else:
                 temp = np.dot(temp, self.layers[i+1].weight_vector.T) * self.activation_function(self.layers[i].neurons, True)
                 d_weights[i] = np.dot(self.layers[i-1].neurons.T, temp)
-        
+            
         if self.number_of_layers == 1:
             x = self.output
         else:
             x = self.layers[1]
 
-        temp = np.dot(temp, x.weight_vector.T) * self.activation_function(self.layers[0].neurons, True)
-        d_weights[0] = np.dot(self.input_vector.T, temp)
+
+        # if self.problem=="regression":
+        #     temp = np.dot(temp.T, x.weight_vector.T).T * self.activation_function(self.layers[0].neurons, True)
+        #     d_weights[0] = np.dot(self.input_vector.T, temp.T)
+        # else:
+            temp = np.dot(temp, x.weight_vector.T) * function(self.layers[0].neurons, True)
+            d_weights[0] = np.dot(self.input_vector.T, temp)
 
         # aktualizowanie wag w kazdej warstwie
         for i in range(self.number_of_layers):
@@ -71,18 +105,25 @@ class NeuralNetwork:
 
 
     def feedforward(self):
-        self.layers[0].neurons = self.activation_function(np.dot(self.input_vector, self.layers[0].weight_vector))
-        for i in range(1, self.number_of_layers):
-            self.layers[i].neurons = self.activation_function(np.dot(self.layers[i-1].neurons, self.layers[i].weight_vector))
+        #print("input wektor: \n", self.input_vector,"Layers0: \n", self.layers[0].weight_vector)
+
+        
 
         if self.problem == "regression":
             function = af.linear_function
             #self.output.neurons = af.linear_function(np.dot(self.layers[self.number_of_layers - 1].neurons, self.output.weight_vector))
         else:
-            function = self.activation_function
-            #self.output.neurons = self.activation_function(np.dot(self.layers[self.number_of_layers - 1].neurons, self.output.weight_vector))
-        self.output.neurons = function(np.dot(self.layers[self.number_of_layers - 1].neurons, self.output.weight_vector))
 
+            function = self.activation_function
+        self.layers[0].neurons = self.activation_function(np.dot(self.input_vector, self.layers[0].weight_vector))
+        for i in range(1, self.number_of_layers):
+            self.layers[i].neurons = self.activation_function(np.dot(self.layers[i-1].neurons, self.layers[i].weight_vector))
+            #self.output.neurons = self.activation_function(np.dot(self.layers[self.number_of_layers - 1].neurons, self.output.weight_vector))
+        # print("self.layers[self.number_of_layers - 1].neurons",self.layers[self.number_of_layers - 1].neurons)
+        # print("self.output.weight_vector",self.output.weight_vector)
+        # print(np.dot(self.layers[self.number_of_layers - 1].neurons, self.output.weight_vector))
+        self.output.neurons = function(np.dot(self.layers[self.number_of_layers - 1].neurons, self.output.weight_vector))
+        # print(self.output.neurons)
 
     def argmax_output(self, matrix):
         new_output = []
@@ -94,25 +135,48 @@ class NeuralNetwork:
 
 
     def train(self, train_set_X, train_set_y, batch_size, number_of_iterations):
-        self.add_layers(train_set_X.shape[1])
+        
+        if self.problem == "regression":
+            #print(len(train_set_y))
+            self.add_layers(1)
+            #print("wagi: ", self.layers[0].weight_vector)
+            n = 1
 
-        n = 1 if self.problem == "regression" else train_set_y.shape[1]
-
+        else :
+            #print(train_set_X.shape[1])
+            self.add_layers(train_set_X.shape[1])
+            n=train_set_y.shape[1]
+            #print("train_set_y: ",train_set_y)
+        
         self.output = Layer(self.layer_size, n)
+        #print("output: ", self.output.weight_vector)
 
         # najlepiej podawać losowe kawałki zbioru danych, zamiast wszystkiego naraz albo pojedynczych próbek,
         # ale powinno zadziałać i tak i tak
         # podział pełnego zbioru treningowego na kawałki:
 
         for i in range(number_of_iterations):
+            #print(int(train_set_X.shape[0]/batch_size))
             for j in range(1,int(train_set_X.shape[0]/batch_size)):
+                # if self.problem == "regression":
+                #     #print([j* batch_size - batch_size :j * batch_size])
+                #     self.input_vector = train_set_X[j* batch_size - batch_size :j * batch_size]
+                #     self.output_vector = np.matrix(train_set_y[j* batch_size - batch_size:j * batch_size]
+                #     print("self.layers[",j,"].weight_vector: ", self.layers[i].weight_vector)
+                # else:
                 self.input_vector = train_set_X[j* batch_size - batch_size :j * batch_size, :]
                 self.output_vector = train_set_y[j* batch_size - batch_size:j * batch_size, :]
+
+
+                #print("i:",i,"j: ",j)
+               # print("self.layers[",j,"].weight_vector: ", self.layers[i].weight_vector)
+
                 #print(j* batch_size - batch_size)
                 #print(j * batch_size)
-
+                
                 self.feedforward()
                 self.backpropagation()
+            #print("self.layers[0].weight_vector: ", self.layers[0].weight_vector)    
             self.loss_values.append(self.loss_function())
             #print("----------------")
 
@@ -125,7 +189,10 @@ class NeuralNetwork:
     def predict(self, test_set_x):
         self.input_vector = test_set_x
         self.feedforward()
-        return self.argmax_output(self.output.neurons)
+        if self.problem == "regression":
+            return self.output.neurons
+        else:
+            return self.argmax_output(self.output.neurons)
 
 
     def evaluate(self,a,b):

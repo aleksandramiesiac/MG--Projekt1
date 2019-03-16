@@ -9,7 +9,8 @@ import numpy as np
 
 def linear_function(x, derivative = False):
     """ Funkcja liniowa """
-    return 1/2 if derivative else (1/2) * x
+    
+    return 0.2 if derivative else (0.2) * x
 
 
 def cut_linear_function(x, derivative = False):
