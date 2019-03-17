@@ -22,6 +22,7 @@ class NeuralNetwork:
         self.problem = config["problem"]                      # problem: klasyfikacja lub regresja
         self.output = None                                    # warstwa wyjsciowa
         self.loss_values = []               # zmienna przygotowana do zapisywania zmieniających się wartości funkcji loss
+        self.number_of_samples = int(config["number_of_samples"])
 
 
     def add_layers(self, shape):
@@ -196,7 +197,10 @@ class NeuralNetwork:
 
 
     def evaluate(self,a,b):
-        return np.sum(a == b)/len(a)
+        if self.problem == "regression":
+            return np.sum(a-b)/(self.number_of_samples)
+        else:
+            return np.sum(a == b)/len(a)
 
 
 
@@ -204,4 +208,5 @@ class Layer:
     def __init__(self, input_size, layer_size):
         self.size = layer_size
         self.neurons = None
+        np.random.seed(123)
         self.weight_vector = np.random.randn(input_size, layer_size)
