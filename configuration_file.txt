@@ -1,9 +1,9 @@
-number_of_layers=3
-layer_size=5
+number_of_layers=5
+layer_size=10
 activation_function=sigmoid_function
-number_of_iterations=1000
+number_of_iterations=1500
 learning_rate=0.1
 batch_size=50
 problem=classification
-set_name=XOR
-number_of_samples=100
+set_name=circles
+number_of_samples=1000

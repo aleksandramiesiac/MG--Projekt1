@@ -6,10 +6,28 @@ Plik z funkcjami aktywacji
 
 import numpy as np
 
+def square_function(x, deriative = False):
+    "Kwadratowa funkcja"
+
+    return 0.005*2*x if deriative else 0.005*np.power(x,2)
+
+def ReLU(x, deriative = False):
+    "Funkcja relu"
+    
+    return 1.*(x>0) if deriative else x*(x>0)
 
 def linear_function(x, derivative = False):
     """ Funkcja liniowa """
-    
+    # if not derivative:
+    #     if x > 0:
+    #         return x
+    #     else:
+    #         return 0
+    # else:
+    #     if x > 0:
+    #         return 1
+    #     else:
+    #         return 0
     return 0.2 if derivative else (0.2) * x
 
 
