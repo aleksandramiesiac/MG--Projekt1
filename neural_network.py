@@ -57,16 +57,16 @@ class NeuralNetwork:
         idx = self.number_of_layers
         
         if self.problem == "regression":
-            function = af.linear_function
+            function = af.ReLU
         else:
             function = self.activation_function
 
-        d2 = d1 * function(self.output.neurons, True)
-        d_weights[idx] = np.dot(self.layers[idx - 1].neurons.T, d2)
+        temp = d1 * function(self.output.neurons, True)
+        d_weights[idx] = np.dot(self.layers[idx - 1].neurons.T, temp)
         idx -= 1
         
         if idx > 0:
-            temp = np.dot(d2, self.output.weight_vector.T) * self.activation_function(self.layers[idx].neurons, True)
+            temp = np.dot(temp, self.output.weight_vector.T) * self.activation_function(self.layers[idx].neurons, True)
             d_weights[idx] = np.dot(self.layers[idx-1].neurons.T, temp)
             idx -= 1
 
@@ -95,7 +95,7 @@ class NeuralNetwork:
 
     def feedforward(self):
         if self.problem == "regression":
-            function = af.linear_function
+            function = af.ReLU
         else:
             function = self.activation_function
 
