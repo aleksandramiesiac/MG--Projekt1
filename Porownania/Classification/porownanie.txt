@@ -1,10 +1,7 @@
 Warstw Neuronow zbior ilosc_probek ilosc_iteracji lost_value Accuracy
 5 10 circles 100 1500 1.1209450323624992 0.8
-Warstw Neuronow zbior ilosc_probek ilosc_iteracji lost_value Accuracy
 5 10 circles 500 1500 5.339014193357815 0.864
-Warstw Neuronow zbior ilosc_probek ilosc_iteracji lost_value Accuracy
 5 10 circles 1000 1500 3.235815897886567 0.945
-Warstw Neuronow zbior ilosc_probek ilosc_iteracji lost_value Accuracy
 5 10 circles 10000 1500 3.4095917753458655 0.9379
 5 10 noisyXOR 100 1500 1.70689881535545 0.82
 5 10 noisyXOR 500 1500 2.804505237087319 0.902
