@@ -8,6 +8,7 @@ import neural_network as nn
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy import linalg as LA
 
 
 ### Wczytywanie pliku konfiguracyjnego i tworzenie slownika z danymi konfiguracyjnymi
@@ -30,7 +31,11 @@ test_file_path = root + ".test." + tail
 
 ### Wczytywanie danych treningowych i testowych
 train_set = pd.read_csv(train_file_path)
+loss_values_train =[]
 test_set = pd.read_csv(test_file_path)
+loss_values_test = []
+
+batch_size=int(config["batch_size"])
 
 if config["problem"] == "classification":
     ## Dane treningowe
@@ -70,25 +75,52 @@ else:
     test_set_y = test_set["y"].values.reshape(len(test_set["y"].values),1)
 
 
-### Tworzenie sieci neuronowej
-NN = nn.NeuralNetwork(config)
+
+
 
 ### Proces uczenia sieci
+batch_size=int(config["batch_size"])
+
 if config["problem"] == "classification":
-    NN.train(train_set_X, train_set_y_ohe, int(config["batch_size"]), int(config["number_of_iterations"]))
+    ### Tworzenie sieci neuronowej
+    NN = nn.NeuralNetwork(config,train_set_X.shape[1],train_set_y_ohe.shape[1])
+    for i in range(int(config["number_of_iterations"])):
+    
+        for j in range(1,int(train_set_X.shape[0]/batch_size)):
+            NN.train(train_set_X[j* batch_size - batch_size :j * batch_size, :], train_set_y_ohe[j* batch_size - batch_size:j * batch_size, :])
+
+        ### Wynik sieci dla zbioru testowego
+        loss_values_train.append(NN.loss_function())
+        NN_output = NN.predict(test_set_X)
+        x = NN.output.neurons - test_set_y_ohe
+        loss_values_test.append(np.power(LA.norm(x),2))
+
 else:
-    NN.train(train_set_X, train_set_y, int(config["batch_size"]), int(config["number_of_iterations"]))
+    ### Tworzenie sieci neuronowej
+    NN = nn.NeuralNetwork(config,train_set_X.shape[1],train_set_y.shape[1])
+    for i in range(int(config["number_of_iterations"])):
+    
+        for j in range(1,int(train_set_X.shape[0]/batch_size)):
+            NN.train(train_set_X[j* batch_size - batch_size :j * batch_size, :], train_set_y[j* batch_size - batch_size:j * batch_size, :])
+
+        ### Wynik sieci dla zbioru testowego
+        loss_values_train.append(NN.loss_function())
+        NN_output = NN.predict(test_set_X)
+        x = NN.output.neurons - test_set_y
+        loss_values_test.append(np.power(LA.norm(x),2))
+
+   
 
 
-### Wynik sieci dla zbioru testowego
-NN_output = NN.predict(test_set_X)
+
+
 
 
 print("\nPorownanie wyniku sieci z oczekiwaniami (fragment zbioru danych):")
 print(NN_output[1:50])
 print(test_set_y[1:50].T)
 
-print("\nKońcowa wartość błędu sieci: " + str(NN.loss_values[-1]))
+print("\nKońcowa wartość błędu sieci: " + str(loss_values_test[-1]))
 
 ### Sprawdzenie wynikow (porownanie z oczekiwanymi)
 score = NN.evaluate(NN_output,test_set_y.T)
@@ -97,10 +129,12 @@ print("\nAccuracy: " + str(score))
 
 #Wykres loss:
 fig, ax = plt.subplots()
-ax.plot(NN.loss_values, 'k', label = "Train set error")
+ax.plot(loss_values_train, 'k', label = "Train set error")
+ax.plot(loss_values_test, 'k--', label = "Test set error")
 lebel = ax.legend(loc ='upper center',shadow =True ,fontsize ='x-large')
 plt.savefig("Porownania/"+ config["problem"].capitalize() + "/"+ config["set_name"]+config["number_of_samples"] +"loss"+".png")
 plt.close()
+
 
 #Wykres podobieństw
 if config["problem"]=="regression":
@@ -111,7 +145,7 @@ if config["problem"]=="regression":
     plt.legend(('Wyestymowane', 'Prawdziwe'),loc='upper right')
     plt.title(config["set_name"]+config["number_of_samples"])
 
-    plt.savefig("Porownania/"+ config["problem"].capitalize() + "/"+ config["set_name"]+config["number_of_samples"] + ".png")
+   # plt.savefig("Porownania/"+ config["problem"].capitalize() + "/"+ config["set_name"]+config["number_of_samples"] + ".png")
     plt.show()
 else:
     plt.subplot(1,2,1)
@@ -121,15 +155,15 @@ else:
     plt.subplot(1,2,2)
     plt.title("Prawdziwe")
     plt.scatter(test_set_X[:,0],test_set_X[:,1], c=test_set_y.T)
-    plt.savefig("Porownania/"+ config["problem"].capitalize() + "/"+ config["set_name"]+config["number_of_samples"] + ".png")
+   # plt.savefig("Porownania/"+ config["problem"].capitalize() + "/"+ config["set_name"]+config["number_of_samples"] + ".png")
     plt.show()
 
 
-#zapisywanie wyników do pliku txt
-f = open("Porownania/"+ config["problem"].capitalize() + "/"+"porownanie.txt", "a")
+# #zapisywanie wyników do pliku txt
+# f = open("Porownania/"+ config["problem"].capitalize() + "/"+"porownanie.txt", "a")
 
-#f.write("Warstw "+"Neuronow"+" zbior"+" ilosc_probek"+" ilosc_iteracji"+" lost_value"+" Accuracy\n")
-f.write(config["number_of_layers"]+" "+config["layer_size"] +" "+config["set_name"]+" "+config["number_of_samples"]+" "+config["number_of_iterations"]+" "+str(NN.loss_values[-1])+" "+str(score)+"\n")
+# #f.write("Warstw "+"Neuronow"+" zbior"+" ilosc_probek"+" ilosc_iteracji"+" lost_value"+" Accuracy\n")
+# f.write(config["number_of_layers"]+" "+config["layer_size"] +" "+config["set_name"]+" "+config["number_of_samples"]+" "+config["number_of_iterations"]+" "+str(NN.loss_values[-1])+" "+str(score)+"\n")
 
-f.close()
+# f.close()
 

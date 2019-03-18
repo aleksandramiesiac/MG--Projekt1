@@ -6,4 +6,4 @@ learning_rate=0.1
 batch_size=50
 problem=classification
 set_name=XOR
-number_of_samples=10000
+number_of_samples=100
