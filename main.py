@@ -132,7 +132,7 @@ fig, ax = plt.subplots()
 ax.plot(loss_values_train, 'k', label = "Train set error")
 ax.plot(loss_values_test, 'k--', label = "Test set error")
 lebel = ax.legend(loc ='upper center',shadow =True ,fontsize ='x-large')
-#plt.savefig("Porownania/"+ config["problem"].capitalize() + "/"+ config["set_name"]+config["number_of_samples"] +"loss"+".png")
+plt.savefig("Porownania/"+ config["problem"].capitalize() + "/"+ config["set_name"]+config["number_of_samples"] +"loss"+".png")
 plt.show()
 plt.close()
 
