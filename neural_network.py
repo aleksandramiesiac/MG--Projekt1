@@ -14,9 +14,19 @@ class NeuralNetwork:
     def __init__(self, config, size_X, size_Y):
         self.input_vector = None            # warstwa wejsciowa
         self.output_vector = None           # oczekiwana odpowiedz dla danej probki
-        self.number_of_layers = int(config["number_of_layers"])     # liczba warstw ukrytych (bez input i output)
+
+        # number_of_layers - liczba warstw ukrytych (bez input i output)
+        # layer_size       - liczba neuronow w warstwie / lista liczb neuronow w poszczegolnych warstwach
+        if "," in config["layer_size"]:
+            self.layer_size = list(map(int, config["layer_size"].split(",")))
+            self.number_of_layers = len(self.layer_size)
+        else:
+            self.number_of_layers = int(config["number_of_layers"])
+            self.layer_size = [int(config["layer_size"])] * int(config["number_of_layers"])
+
+        #self.number_of_layers = int(config["number_of_layers"])     # liczba warstw ukrytych (bez input i output)
         self.layers = [None] * self.number_of_layers          # warstwy ukryte
-        self.layer_size = int(config["layer_size"])           # liczba neuronow w warstwie
+        #self.layer_size = int(config["layer_size"])           # liczba neuronow w warstwie
         self.activation_function = getattr(af, config["activation_function"])  # funkcja aktywacji; domyslnie - sigmoidalna funkcja unipolarna 
         self.learning_rate = float(config["learning_rate"])   # wspolczynnik nauki
         self.problem = config["problem"]                      # problem: klasyfikacja lub regresja
@@ -26,21 +36,19 @@ class NeuralNetwork:
         if self.problem == "regression":
             self.add_layers(1)
             n = 1
-
-        else :
+        else:
             self.add_layers(size_X) #train_set_X.shape[1]
-            n=size_Y #train_set_y.shape[1]
-        self.output = Layer(self.layer_size, n)               # warstwa wyjsciowa
-        
+            n = size_Y #train_set_y.shape[1]
+        self.output = Layer(self.layer_size[self.number_of_layers - 1], n)               # warstwa wyjsciowa
 
 
     def add_layers(self, shape):
-        self.layers[0] = Layer(shape, self.layer_size)
+        # self.layers[0] = Layer(shape, self.layer_size)
+        self.layers[0] = Layer(shape, self.layer_size[0])
         for i in range(1, self.number_of_layers):
             # TO DO: dla roznych liczb neuronow w warstwach (wtedy self.layer_size jest tablica)
-            # self.layers[i] = Layer(self.layer_size[i-1], self.layer_size[i])
-            self.layers[i] = Layer(self.layer_size, self.layer_size)
-
+            self.layers[i] = Layer(self.layer_size[i-1], self.layer_size[i])
+            #self.layers[i] = Layer(self.layer_size, self.layer_size)
 
 
     def backpropagation(self):
@@ -71,9 +79,8 @@ class NeuralNetwork:
         else:
             x = self.layers[1]
 
-            temp = np.dot(temp, x.weight_vector.T) * function(self.layers[0].neurons, True)
-            d_weights[0] = np.dot(self.input_vector.T, temp)
-
+        temp = np.dot(temp, x.weight_vector.T) * function(self.layers[0].neurons, True)
+        d_weights[0] = np.dot(self.input_vector.T, temp)
 
         # aktualizowanie wag w kazdej warstwie
         for i in range(self.number_of_layers):
@@ -153,9 +160,9 @@ class NeuralNetwork:
 
     def evaluate(self,a,b):
         if self.problem == "regression":
-            return np.sum(a-b)/(self.number_of_samples)
+            return np.sum(a - b) / (self.number_of_samples)
         else:
-            return np.sum(a == b)/len(a)
+            return np.sum(a == b) / len(a)
 
 
 
