@@ -6,28 +6,19 @@ Plik z funkcjami aktywacji
 
 import numpy as np
 
-def square_function(x, deriative = False):
-    "Kwadratowa funkcja"
 
-    return 0.005*2*x if deriative else 0.005*np.power(x,2)
+def square_function(x, deriative = False):
+    """ Kwadratowa funkcja """
+    return 0.005 * 2 * x if deriative else 0.005 * np.power(x, 2)
+
 
 def ReLU(x, deriative = False):
-    "Funkcja relu"
-    
-    return 1.*(x>0) if deriative else x*(x>0)
+    """ Funkcja relu """
+    return 1. * (x > 0) if deriative else x * (x > 0)
+
 
 def linear_function(x, derivative = False):
     """ Funkcja liniowa """
-    # if not derivative:
-    #     if x > 0:
-    #         return x
-    #     else:
-    #         return 0
-    # else:
-    #     if x > 0:
-    #         return 1
-    #     else:
-    #         return 0
     return 0.2 if derivative else (0.2) * x
 
 
@@ -49,7 +40,7 @@ def cut_linear_function(x, derivative = False):
 
 
 def unipolar_threshold_function(x, derivative = False):
-    """Funkcja progowa unipolarna """
+    """ Funkcja progowa unipolarna """
     wektor = []
     d = [0] * len(x)
     for elem in x:
@@ -61,7 +52,7 @@ def unipolar_threshold_function(x, derivative = False):
 
 
 def bipolar_threshold_function(x, derivative = False):
-    """Funkcja progowa bipolarna """
+    """ Funkcja progowa bipolarna """
     wektor = []
     d = [0] * len(x)
     for elem in x:
@@ -78,7 +69,7 @@ def sigmoid_function(x, derivative = False):
 
 
 def sigmoid_function_bi(x, derivative = False):
-    """Sigmoidalna funkcja bipolarna (tangens hiperboliczny) """
+    """ Sigmoidalna funkcja bipolarna (tangens hiperboliczny) """
     return sigmoid_function_bi_d(x) if derivative else sigmoid_function_bi_f(x)
 
 
